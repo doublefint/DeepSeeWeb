@@ -70,46 +70,54 @@
          * Load saved filter values from settings
          */
         function loadFiltersFromSettings() {
-            if (!Storage.getAppSettings().isSaveFilters) return;
-            var found = false;
-            var widgets = Storage.getWidgetsSettings(_this.dashboard, Connector.getNamespace());
-            if (widgets._filters) {
-                for (var i = 0; i < widgets._filters.length; i++) {
-                    var flt = widgets._filters[i];
+            
+            if ( !Storage.getAppSettings().isSaveFilters ) return
 
-                    var exists = _this.items.filter(function(el) { return el.targetProperty === flt.targetProperty; })[0];
-                    if (exists) {
-                        // Check for single value
-                        exists.value = flt.value;
-                        exists.isExclude = flt.isExclude;
-                        exists.isInterval = flt.isInterval;
+            var found = false
+            var widgets = Storage.getWidgetsSettings( _this.dashboard, Connector.getNamespace() )
+            if ( !widgets._filters ) return 
+            const filters = widgets._filters
+                
+            filters.forEach( flt => {
 
-                        if (exists.isInterval) {
-                            exists.fromIdx = flt.fromIdx;
-                            exists.toIdx = flt.toIdx;
-                            exists.valueDisplay = exists.values[exists.fromIdx].name + ':' + exists.values[exists.toIdx].name;
-                        } else {
-                            var values = flt.value.split('|');
+                var exists = _this.items.filter( el => el.targetProperty === flt.targetProperty )[0];
+                if ( !exists ) return
+                
+                // Check for single value
+                exists.value = flt.value
+                exists.isExclude = flt.isExclude
+                exists.isInterval = flt.isInterval
 
-                            // Multiple values was selected
-                            exists.values.forEach(function (v) {
-                                if (values.indexOf(v.path) !== -1) v.checked = true;
-                            });
+                if (exists.isInterval) {
+                    
+                    exists.fromIdx = flt.fromIdx
+                    exists.toIdx = flt.toIdx
+                    exists.valueDisplay = exists.values[exists.fromIdx].name + ':' + exists.values[exists.toIdx].name
+                    
+                } else {
 
-                            exists.valueDisplay = flt.value.split('|').map(el => {
-                                let isNot = el.indexOf('.%NOT') !== -1;
-                                if (isNot) el = el.replace('.%NOT', '');
-                                let v = exists.values.find(e => e.path == el);
-                                let name = '';
-                                if (v && v.name) name = v.name.toString();
-                                return (isNot ? Lang.get('not') + ' ' : '') + name;
-                            }).join(',');
-                        }
+                    let values = flt.value.split( '|' )
 
-                        found = true;
-                    }
+                    // Multiple values was selected
+                    exists.values.forEach( v => {
+                        if ( values.indexOf(v.path) !== -1 ) v.checked = true
+                    })
+
+                    exists.valueDisplay = flt.value.split('|').map( el => {
+                        
+                        let isNot = el.indexOf('.%NOT') !== -1
+                        if (isNot) el = el.replace('.%NOT', '')
+                        let v = exists.values.find(e => e.path == el)
+                        let name = ''
+                        if (v && v.name) name = v.name.toString()
+                        return (isNot ? Lang.get('not') + ' ' : '') + name
+
+                    }).join(',')
                 }
-            }
+
+                found = true
+            })
+            
         }
 
         function getClickFilterTarget(widgetName) {

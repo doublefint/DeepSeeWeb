@@ -49,8 +49,8 @@ gulp.task('sass:watch', ['sass-dev'], function () {
 
 // Runing jshint an all source
 gulp.task('lint', function() {
-    gulp.src(['src/**/*.js', '!src/lib/*'])
-        .pipe(jshint())
+    gulp.src(['src/**/*.js', '!src/lib/*', '!src/addons/*'])
+        .pipe(jshint( { esversion: 6 } ))
         .pipe(jshint.reporter('default'));
 });
 
