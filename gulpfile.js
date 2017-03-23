@@ -12,7 +12,13 @@ var gulp   = require('gulp'),
     replace = require('gulp-replace'),
     release = require('gulp-github-release'),
     through = require('through2'),
-    traceur = require('gulp-traceur-compiler');
+    traceur = require('gulp-traceur-compiler'),
+    
+    path = require( 'path' ),
+    p = require('./package.json'),
+    deploy = require('./deploy') // deploy to local windows host via cache.exe
+   
+;
 
     // TODO: add html-min
 
@@ -194,9 +200,7 @@ gulp.task('create-install-package', ['enum-files'], function() {
     <Data><![CDATA[${content}]]></Data>
 </XData>`;
     }
-
-    var p = require('./package.json');
-
+    
     // Change exists Installer class
     var installer = fs.readFileSync('./DSW.Installer.xml', 'utf8');
     installer = installer.substring(0, installer.length - 11);
@@ -205,12 +209,20 @@ gulp.task('create-install-package', ['enum-files'], function() {
     console.log('DSW.Installer.xml was created!')
 });
 
+/**/
+gulp.task('deploy', ['create-install-package'], () => {
+
+    const file = path.join( __dirname, 'build', 'DSW.Installer.' +  p.version + '.xml' )
+    deploy( file, () => console.log( 'deploy done' ) )
+
+})
 
 /* Generate jsdoc
 gulp.task('jsdoc', function() {
     return gulp.src(['src/ * * /*.js', '!src/lib/*'])
         .pipe(jsdoc('./documentation'));
 });*/
+
 gulp.task('build-mobile', ['lint', 'minify', 'cssminify', 'concat-templates', 'copyfiles-mobile', 'cleanup'], function () {});
 
 gulp.task('default', ['lint', 'minify', 'cssminify', 'concat-templates', 'copyfiles', 'cleanup'], function () {});
